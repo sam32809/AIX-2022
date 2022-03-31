@@ -29,8 +29,8 @@ mac u_mac_00(
 ./*input 		 */clk(clk), 
 ./*input 		 */rstn(rstn), 
 ./*input 		 */vld_i(vld_i), 
-./*input [127:0] */win(win[0]), 
-./*input [71:0]  */din(din),
+./*input [71:0] */win(win[0]), 
+./*input [215:0]  */din(din),
 ./*output[ 19:0] */acc_o(acc_o[0]), 
 ./*output        */vld_o(vld_o[0])
 );

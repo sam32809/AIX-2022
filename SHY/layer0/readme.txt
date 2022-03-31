@@ -9,3 +9,8 @@ Ti, To 관련 mac 개수 변경, mul, adder_tree 변경
 
 
 기타 변경 안된사항 인지중
+
+3/31 변경사항
+cnv.v
+ all_acc_o, din, win bits 알맞게 변경
+ sfw 추가
