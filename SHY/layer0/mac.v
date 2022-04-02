@@ -4,45 +4,45 @@ module mac(
 input clk, 
 input rstn, 
 input vld_i, 
-input [71:0] win, 
-input [71:0] din,
-output[ 19:0] acc_o, 
+input [215:0] win, 
+input [215:0] din,
+output[ 20:0] acc_o, 
 output        vld_o
 );
 
 //----------------------------------------------------------------------
 // Signals
 //----------------------------------------------------------------------
-wire[15:0] y00;
-wire[15:0] y01;
-wire[15:0] y02;
-wire[15:0] y03;
-wire[15:0] y04;
-wire[15:0] y05;
-wire[15:0] y06;
-wire[15:0] y07;
-wire[15:0] y08;
-wire[15:0] y09;
-wire[15:0] y10;
-wire[15:0] y11;
-wire[15:0] y12;
-wire[15:0] y13;
-wire[15:0] y14;
-wire[15:0] y15;
-wire[15:0] y16;
-wire[15:0] y17;
-wire[15:0] y18;
-wire[15:0] y19;
-wire[15:0] y20;
-wire[15:0] y21;
-wire[15:0] y22;
-wire[15:0] y23;
-wire[15:0] y24;
-wire[15:0] y25;
-wire[15:0] y26;
+reg[15:0] y00;
+reg[15:0] y01;
+reg[15:0] y02;
+reg[15:0] y03;
+reg[15:0] y04;
+reg[15:0] y05;
+reg[15:0] y06;
+reg[15:0] y07;
+reg[15:0] y08;
+reg[15:0] y09;
+reg[15:0] y10;
+reg[15:0] y11;
+reg[15:0] y12;
+reg[15:0] y13;
+reg[15:0] y14;
+reg[15:0] y15;
+reg[15:0] y16;
+reg[15:0] y17;
+reg[15:0] y18;
+reg[15:0] y19;
+reg[15:0] y20;
+reg[15:0] y21;
+reg[15:0] y22;
+reg[15:0] y23;
+reg[15:0] y24;
+reg[15:0] y25;
+reg[15:0] y26;
 
 
-reg vld_i_d0, vld_i_d1, vld_i_d2, vld_i_d3, vld_i_d4, vld_i_d5;
+reg vld_i_d0, vld_i_d1, vld_i_d2, vld_i_d3, vld_i_d4;
 //----------------------------------------------------------------------
 // Components: Array of multipliers
 //----------------------------------------------------------------------
@@ -89,7 +89,7 @@ always@(posedge clk, negedge rstn) begin
 		vld_i_d1 <= vld_i_d0;
 		vld_i_d2 <= vld_i_d1;
 		vld_i_d3 <= vld_i_d2;
-		vld_i_d4 <= vld_i_d3;	
+		vld_i_d4 <= vld_i_d3;		
 	end
 end
 //----------------------------------------------------------------------
@@ -107,7 +107,25 @@ adder_tree u_adder_tree(
 ./*input [15:0] */mul_05(y05), 
 ./*input [15:0] */mul_06(y06), 
 ./*input [15:0] */mul_07(y07),
-./*input [15:0] */mul_08(y08), 
+./*input [15:0] */mul_08(y08),
+./*input [15:0] */mul_09(y09), 
+./*input [15:0] */mul_10(y10), 
+./*input [15:0] */mul_11(y11), 
+./*input [15:0] */mul_12(y12), 
+./*input [15:0] */mul_13(y13), 
+./*input [15:0] */mul_14(y14), 
+./*input [15:0] */mul_15(y15), 
+./*input [15:0] */mul_16(y16),
+./*input [15:0] */mul_17(y17), 
+./*input [15:0] */mul_18(y18), 
+./*input [15:0] */mul_19(y19), 
+./*input [15:0] */mul_20(y20), 
+./*input [15:0] */mul_21(y21), 
+./*input [15:0] */mul_22(y22), 
+./*input [15:0] */mul_23(y23), 
+./*input [15:0] */mul_24(y24), 
+./*input [15:0] */mul_25(y25),
+./*input [15:0] */mul_26(y26),  
 ./*output[19:0] */acc_o(acc_o),
 ./*output       */vld_o(vld_o) 
 );

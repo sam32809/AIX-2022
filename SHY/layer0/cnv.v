@@ -5,7 +5,7 @@ input[11:0] 			row,col,
 input[71:0] 			weight,
 input [2457599:0] 		img, //input image
 input					ctrl_data_run,
-output[127:0] 			all_acc_o,
+output[63:0] 			all_acc_o,
 output					v_o
 //output[15:0] frame_done
 );
@@ -14,9 +14,9 @@ parameter WIDTH=320;
 parameter HEIGHT=320;
 
 wire[7:0] in_img[0:307199];//Input images
-wire[19:0] acc_o[0:15];
+wire[20:0] acc_o[0:7];
 reg[215:0] din;
-reg[71:0] win[0:15];
+reg[215:0] win[0:7];
 
 reg vld_i=1'b1;
 wire vld_o[0:15];
@@ -29,7 +29,7 @@ mac u_mac_00(
 ./*input 		 */clk(clk), 
 ./*input 		 */rstn(rstn), 
 ./*input 		 */vld_i(vld_i), 
-./*input [71:0] */win(win[0]), 
+./*input [215:0] */win(win[0]), 
 ./*input [215:0]  */din(din),
 ./*output[ 19:0] */acc_o(acc_o[0]), 
 ./*output        */vld_o(vld_o[0])
@@ -103,10 +103,9 @@ mac u_mac_07(
 // Output
 //-------------------------------------------------
 
-wire[127:0] all_acc_o = {acc_o[15][19:12],acc_o[14][19:12],acc_o[13][19:12],acc_o[12][19:12]
-,acc_o[11][19:12],acc_o[10][19:12],acc_o[9][19:12],acc_o[8][19:12],acc_o[7][19:12]
-,acc_o[6][19:12],acc_o[5][19:12],acc_o[4][19:12],acc_o[3][19:12],acc_o[2][19:12]
-,acc_o[1][19:12],acc_o[0][19:12]};
+assign all_acc_o = {acc_o[7][20:13]
+,acc_o[6][20:13],acc_o[5][20:13],acc_o[4][20:13],acc_o[3][20:13],acc_o[2][20:13]
+,acc_o[1][20:13],acc_o[0][20:13]};
 
 
 //-------------------------------------------------
