@@ -59,13 +59,21 @@ reg [17:0] y2_0;
 reg [17:0] y2_1;
 reg [17:0] y2_2;
 reg [17:0] y2_3;
+reg [17:0] y2_4;
+reg [17:0] y2_5;
+reg [17:0] y2_6;
 // Level 3
-reg [20:0] y3_0;
-reg [20:0] y3_1;
+reg [18:0] y3_0;
+reg [18:0] y3_1;
+reg [18:0] y3_2;
+reg [18:0] y3_3;
 // Level 4
-reg [19:0] y4;
+reg [19:0] y4_0;
+reg [19:0] y4_1;
+// Level 5
+reg [20:0] y5;
 // Delays
-reg vld_i_d1, vld_i_d2, vld_i_d3, vld_i_d4;
+reg vld_i_d1, vld_i_d2, vld_i_d3, vld_i_d4, vld_i_d5;
 //-------------------------------------------------
 // Reduction tree
 //-------------------------------------------------
@@ -147,12 +155,14 @@ end
 
 // Level 4
 always@(posedge clk, negedge rstn) begin
-	if(!rstn)
+	if(!rstn) begin
 		y4_0 <= 20'd0;
 		y4_1 <= 20'd0;
-	else
+	end
+	else begin
 		y4_0 <= $signed(y3_0) + $signed(y3_1);
 		y4_1 <= $signed(y3_2) + $signed(y3_3);
+    end
 end
 
 // Level 5
@@ -160,7 +170,7 @@ always@(posedge clk, negedge rstn) begin
 	if(!rstn)
 		y5 <= 21'd0;
 	else
-		y5 <= $signed(y3_0) + $signed(y3_1);
+		y5 <= $signed(y4_0) + $signed(y4_1);
 end
 
 //-------------------------------------------------

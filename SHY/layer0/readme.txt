@@ -14,3 +14,9 @@ Ti, To 관련 mac 개수 변경, mul, adder_tree 변경
 cnv.v
  all_acc_o, din, win bits 알맞게 변경
  sfw 추가
+
+
+4/2 변경사항
+
+port bit수 수정
+tb 추가
