@@ -20,6 +20,7 @@ o_row,
 o_col,
 o_data_count,
 o_end_frame,
+o_half_frame,
 o_pix_idx
 );
 
@@ -44,6 +45,7 @@ output [W_SIZE-1:0] 	 o_row;
 output [W_SIZE-1:0] 	 o_col;
 output [W_FRAME_SIZE-1:0]o_data_count;
 output o_end_frame;
+output o_half_frame;
 output [3:0] o_pix_idx;
 //-------------------------------------------------
 // Internal signals
@@ -62,6 +64,7 @@ reg [W_SIZE-1:0] 	row;
 reg [W_SIZE-1:0] 	col;
 reg [W_FRAME_SIZE-1:0] data_count;
 wire end_frame;
+wire half_frame;
 reg [3:0] pix_idx;
 //-------------------------------------------------
 // FSM
@@ -172,7 +175,7 @@ begin
     end
 end
 assign end_frame = (data_count == q_frame_size-1)? 1'b1: 1'b0;			
-
+assign half_frame = (data_count == (q_frame_size/2)-1)? 1'b1: 1'b0;
 //-------------------------------------------------
 // Outputs
 //-------------------------------------------------

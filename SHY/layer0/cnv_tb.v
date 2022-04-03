@@ -20,9 +20,9 @@ parameter W_CELL_PARAM 	= $clog2(N_CELL_PARAM);
 parameter INFILE    = "C:/AIX/layer0/sim/input_data/butterfly_08bit.hex"; // check your file path
 localparam FRAME_SIZE = WIDTH * HEIGHT;
 localparam FRAME_SIZE_W = $clog2(FRAME_SIZE);
-reg [7:0] in_img [0:FRAME_SIZE-1];	// Input image
+reg [7:0] in_img [0:(3*FRAME_SIZE)-1];	// Input image
 //reg [8*(WIDTH+2)-1:0] fmap_buffer [0:2]; // considering padding
-wire [8*WIDTH*HEIGHT-1:0] img;
+//wire [8*WIDTH*HEIGHT-1:0] img;
 reg [Ti*WI-1:0] win[0:To-1];			// Weight
 reg [PARAM_BITS-1:0] scale[0:To-1];		// Scales (Batch normalization)
 reg [PARAM_BITS-1:0] bias[0:To-1];		// Biases
@@ -35,6 +35,7 @@ reg vld_i;
 reg [215:0] din;
 wire[ 20:0] acc_o[0:7];
 wire        vld_o[0:7];
+
 
 localparam MEM_ADDRW = 22;
 localparam MEM_DW = 8;
@@ -336,7 +337,7 @@ integer ch_idx;
 
 // fmap buffer
 reg [FRAME_SIZE_W-1:0] pixel_count;
-reg layer_done;
+reg half_done;
 
 // Weight
 always@(*) begin
@@ -453,20 +454,21 @@ u_buf_scale(
 wire [ACT_BITS*To-1:0] all_acc_o = {acc_o[7][20:13]
 ,acc_o[6][20:13],acc_o[5][20:13],acc_o[4][20:13],acc_o[3][20:13],acc_o[2][20:13]
 ,acc_o[1][20:13],acc_o[0][20:13]};
-/*
+
 // store the mac results
-dpram_wrapper #(.DW(To*ACT_BITS), .AW(FRAME_SIZE_W),.DEPTH(FRAME_SIZE))
+dpram_wrapper #(.DW(To*ACT_BITS), .AW(FRAME_SIZE_W),.DEPTH(FRAME_SIZE/2))
 u_buf_fmap(
    .clk   (clk   ),
    .ena   (vld_o[0]), 
    .wea   (vld_o[0]), 
    .addra (pixel_count), 
-   .enb   (layer_done),	// for read
+   .enb   (half_done),	// for read
    .addrb (addrb ),  // for read
    .dia   (all_acc_o), 
    .dob   (dob )   // for read
 );
-*/
+
+
 
 //-------------------------------------------------
 // Update the output buffers.
@@ -474,17 +476,18 @@ u_buf_fmap(
 always@(posedge clk, negedge rstn) begin
     if(!rstn) begin
         pixel_count <= 0;
-        layer_done <= 0;
+		half_done <= 0;
     end else begin
         if(q_start) begin
-            pixel_count <= 0;
-            layer_done <= 0;			
+            pixel_count <= 0;	
+			half_done <= 0;
         end
         else begin
             if(vld_o[0]) begin
-                if(pixel_count == FRAME_SIZE-1) begin
+				if(pixel_count == FRAME_SIZE/2-1) half_done <= 1'b1;
+                else if(pixel_count == FRAME_SIZE-1) begin
                     pixel_count <= 0;
-                    layer_done <= 1'b1;
+                    half_done <= 1'b1;
                 end
                 else begin
                     pixel_count <= pixel_count + 1;
@@ -584,7 +587,7 @@ integer i;
 //------------------------------------------------------------------------------------------------------
 // Read the input file to memory
 initial begin
-	$readmemh(INFILE, in_img ,0,FRAME_SIZE-1);
+	$readmemh(INFILE, in_img ,0,(3*FRAME_SIZE)-1);
 end
 initial begin
 	rstn = 1'b0;			// Reset, low active	
@@ -645,25 +648,25 @@ always @*
         din[63:56] = (is_last_row                ) ? 8'd0 : in_img[(row+1) * WIDTH +  col   ];
         din[71:64] = (is_last_row | is_last_col  ) ? 8'd0 : in_img[(row+1) * WIDTH + (col+1)];
 		
-		din[79:72] = (is_first_row | is_first_col) ? 8'd0 : in_img[WIDTH*HEIGHT + (row-1) * WIDTH + (col-1)];
-        din[87:80] = (is_first_row               ) ? 8'd0 : in_img[WIDTH*HEIGHT + (row-1) * WIDTH +  col   ];
-        din[95:88] = (is_first_row | is_last_col ) ? 8'd0 : in_img[WIDTH*HEIGHT + (row-1) * WIDTH + (col+1)];
-        din[103:96] = (               is_first_col) ? 8'd0 : in_img[WIDTH*HEIGHT + row    * WIDTH + (col-1)];
-        din[111:104] =                                        in_img[WIDTH*HEIGHT + row    * WIDTH +  col   ];
-        din[119:112] = (               is_last_col ) ? 8'd0 : in_img[WIDTH*HEIGHT + row    * WIDTH + (col+1)];
-        din[127:120] = (is_last_row | is_first_col ) ? 8'd0 : in_img[WIDTH*HEIGHT + (row+1) * WIDTH + (col-1)];
-        din[135:128] = (is_last_row                ) ? 8'd0 : in_img[WIDTH*HEIGHT + (row+1) * WIDTH +  col   ];
-        din[143:136] = (is_last_row | is_last_col  ) ? 8'd0 : in_img[WIDTH*HEIGHT + (row+1) * WIDTH + (col+1)];
+		din[79:72] = (is_first_row | is_first_col) ? 8'd0 : in_img[FRAME_SIZE + (row-1) * WIDTH + (col-1)];
+        din[87:80] = (is_first_row               ) ? 8'd0 : in_img[FRAME_SIZE + (row-1) * WIDTH +  col   ];
+        din[95:88] = (is_first_row | is_last_col ) ? 8'd0 : in_img[FRAME_SIZE + (row-1) * WIDTH + (col+1)];
+        din[103:96] = (               is_first_col) ? 8'd0 : in_img[FRAME_SIZE + row    * WIDTH + (col-1)];
+        din[111:104] =                                        in_img[FRAME_SIZE + row    * WIDTH +  col   ];
+        din[119:112] = (               is_last_col ) ? 8'd0 : in_img[FRAME_SIZE + row    * WIDTH + (col+1)];
+        din[127:120] = (is_last_row | is_first_col ) ? 8'd0 : in_img[FRAME_SIZE + (row+1) * WIDTH + (col-1)];
+        din[135:128] = (is_last_row                ) ? 8'd0 : in_img[FRAME_SIZE + (row+1) * WIDTH +  col   ];
+        din[143:136] = (is_last_row | is_last_col  ) ? 8'd0 : in_img[FRAME_SIZE + (row+1) * WIDTH + (col+1)];
 		
-		din[151:144] = (is_first_row | is_first_col) ? 8'd0 : in_img[2*WIDTH*HEIGHT + (row-1) * WIDTH + (col-1)];
-        din[159:152] = (is_first_row               ) ? 8'd0 : in_img[2*WIDTH*HEIGHT + (row-1) * WIDTH +  col   ];
-        din[167:160] = (is_first_row | is_last_col ) ? 8'd0 : in_img[2*WIDTH*HEIGHT + (row-1) * WIDTH + (col+1)];
-        din[175:168] = (               is_first_col) ? 8'd0 : in_img[2*WIDTH*HEIGHT +  row    * WIDTH + (col-1)];
-        din[183:176] =                                        in_img[2*WIDTH*HEIGHT +  row    * WIDTH +  col   ];
-        din[191:184] = (               is_last_col ) ? 8'd0 : in_img[2*WIDTH*HEIGHT +  row    * WIDTH + (col+1)];
-        din[199:192] = (is_last_row | is_first_col ) ? 8'd0 : in_img[2*WIDTH*HEIGHT + (row+1) * WIDTH + (col-1)];
-        din[207:200] = (is_last_row                ) ? 8'd0 : in_img[2*WIDTH*HEIGHT + (row+1) * WIDTH +  col   ];
-        din[215:208] = (is_last_row | is_last_col  ) ? 8'd0 : in_img[2*WIDTH*HEIGHT + (row+1) * WIDTH + (col+1)];
+		din[151:144] = (is_first_row | is_first_col) ? 8'd0 : in_img[(2*FRAME_SIZE) + (row-1) * WIDTH + (col-1)];
+        din[159:152] = (is_first_row               ) ? 8'd0 : in_img[(2*FRAME_SIZE) + (row-1) * WIDTH +  col   ];
+        din[167:160] = (is_first_row | is_last_col ) ? 8'd0 : in_img[(2*FRAME_SIZE) + (row-1) * WIDTH + (col+1)];
+        din[175:168] = (               is_first_col) ? 8'd0 : in_img[(2*FRAME_SIZE) +  row    * WIDTH + (col-1)];
+        din[183:176] =                                        in_img[(2*FRAME_SIZE) +  row    * WIDTH +  col   ];
+        din[191:184] = (               is_last_col ) ? 8'd0 : in_img[(2*FRAME_SIZE) +  row    * WIDTH + (col+1)];
+        din[199:192] = (is_last_row | is_first_col ) ? 8'd0 : in_img[(2*FRAME_SIZE) + (row+1) * WIDTH + (col-1)];
+        din[207:200] = (is_last_row                ) ? 8'd0 : in_img[(2*FRAME_SIZE) + (row+1) * WIDTH +  col   ];
+        din[215:208] = (is_last_row | is_last_col  ) ? 8'd0 : in_img[(2*FRAME_SIZE) + (row+1) * WIDTH + (col+1)];
     end
 end
 
@@ -674,10 +677,10 @@ reg [16:0] addrb;
 wire [31:0] dob;
 always@(posedge clk, negedge rstn) begin
     if(!rstn) addrb <= 0;
-    else if(layer_done) begin
-        if(addrb == 17'd102400) layer_done <= 0;
-        else addrb <= addrb + 1;
-    end
+	else if(half_done) begin
+		if(addrb == 17'd51200) half_done <= 0;
+		else addrb <= addrb + 1;
+	end
 end
 //////////////////////////////////////////////
 

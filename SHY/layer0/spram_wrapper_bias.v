@@ -113,6 +113,18 @@ reg	[DW-1			:	0]		rdata_o;
 				.douta(rdata)
 			 );
 		end
+		else if((DEPTH == 16) && (DW == 16)) begin: gen_spram_16x16
+			spram_16x16_bias u_spram_16x16( 
+				// write
+				.clka(clk),
+				.ena(cs),
+				.wea(we),
+				.addra(addr),
+				.dina(wdata),
+				// read-out
+				.douta(rdata)
+			 );
+		end
 	endgenerate
 
 `else 
