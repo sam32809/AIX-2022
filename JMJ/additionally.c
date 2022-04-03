@@ -2333,25 +2333,33 @@ image resize_image(image im, int w, int h)
     FILE* fp_R = fopen("REDc.hex", "w");
     FILE* fp_G = fopen("GREENc.hex", "w");
     FILE* fp_B = fopen("BLUEc.hex", "w");
+
     // resize 한 파일 RGB hex 파일로 저장
-    for (k = 0; k < resized.c; ++k) {
-        for (int i = 0; i < resized.w * resized.h; ++i) {
-            if (k == 0) {
+    for (k = 0; k < resized.c; ++k)
+    {
+        for (int i = 0; i < resized.w * resized.h; ++i)
+        {
+            if (k == 0)
+            {
                 fprintf(fp_R, "%02x\n", (unsigned char)(255 * resized.data[i + k * resized.w * resized.h]));
             }
-            else if (k == 1) {
+            else if (k == 1)
+            {
                 fprintf(fp_G, "%02x\n", (unsigned char)(255 * resized.data[i + k * resized.w * resized.h]));
             }
-            else if (k == 2) {
+            else if (k == 2)
+            {
                 fprintf(fp_B, "%02x\n", (unsigned char)(255 * resized.data[i + k * resized.w * resized.h]));
             }
         }
     }
 
-    free_image(part);
+
     fclose(fp_R);
     fclose(fp_G);
     fclose(fp_B);
+
+    free_image(part);
     return resized;
 }
 
